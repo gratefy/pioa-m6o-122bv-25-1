@@ -63,12 +63,36 @@ def select_record(
         result.append(record)
     return result
 
+def update_record(
+    student_id: int,
+    first_name: str | None = None,
+    second_name: str | None = None,
+    age: int | None = None,
+    sex: str | None = None,
+) -> StudentRecord:
+    
+    for i, record in enumerate(Student):
+        if record[0] == student_id:
+            updated_record = list(record)
+            
+            if first_name is not None:
+                updated_record[1] = first_name.strip()
+            if second_name is not None:
+                updated_record[2] = second_name.strip()
+            if age is not None:
+                if age < 0:
+                    raise ValueError("Поле age не может быть отрицательным.")
+                updated_record[3] = age
+            if sex is not None:
+                updated_record[4] = sex.strip()
+            Student[i] = tuple(updated_record)
+            return Student[i]
+    
+        raise KeyError(f"Запись с id={student_id} не найдена.")
 
-def update_record():
-    """Обновляет поля существующей записи по идентификатору или фильтру."""
-    pass
-
-
-def delete_record():
-    """Удаляет запись из таблицы по идентификатору или фильтру."""
-    pass
+def delete_record(student_id: int) -> None:
+    for i, record in enumerate(Student):
+        if record[0] == student_id:
+            del Student[i]
+            return
+    raise KeyError(f"Запись с id={student_id} не найдена.")

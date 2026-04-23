@@ -1,11 +1,12 @@
-from .backend.memory import create_record, select_record
+from .backend.memory import create_record, select_record, update_record, delete_record
 # Функция вывода текстового меню в консоль.
 def _print_menu() -> None:
-    # Символ \n обозначает перевод строки.
     print("\n=== База студентов ===")
     print("1. Добавить запись")
     print("2. Показать все записи")
     print("3. Найти записи по фильтру")
+    print("4. Обновить запись")    # Добавить
+    print("5. Удалить запись")      # Добавить
     print("0. Выход")
 
 # Функция чтения целочисленного значения из консоли.
@@ -75,14 +76,11 @@ def _read_optional_int(prompt: str) -> int | None:
         except ValueError:
             print("Ошибка: введите целое число или оставьте поле пустым.")
 
-# Функция поиска записей по заданным фильтрам.
 def _find_students_by_filter() -> None:
     print("\nПоиск по фильтру (Enter = пропустить поле)")
 
     student_id = _read_optional_int("id: ")
 
-    # Оператор `or` возвращает первое истинное значение.
-    # Если строка после strip() пуста, будет возвращено None.
     first_name = input("first_name: ").strip() or None
     second_name = input("second_name: ").strip() or None
 
@@ -100,36 +98,70 @@ def _find_students_by_filter() -> None:
     _print_records(records)
 
 def run() -> None:
-    """
-    Запускает основной цикл текстового пользовательского интерфейса.
-
-    Цикл выполняется до тех пор, пока пользователь явно
-    не выберет завершение программы.
-    """
     while True:
-        # Отображение меню доступных действий.
         _print_menu()
-
-        # Получение команды пользователя.
-        # Метод strip() удаляет пробельные символы
-        # в начале и в конце строки.
         action = input("Выберите действие: ").strip()
-
-        # Диспетчеризация пользовательской команды.
+        
         if action == "1":
             _add_student()
-
         elif action == "2":
             _show_all_students()
-
         elif action == "3":
             _find_students_by_filter()
-
+        elif action == "4":          
+            _update_student()
+        elif action == "5":           
+            _delete_student()
         elif action == "0":
-            # Завершение работы программы.
             print("Выход из программы.")
             break
-
         else:
-            # Обработка некорректного ввода команды.
             print("Неизвестная команда. Повторите ввод.")
+
+def _update_student() -> None:
+    """Обновление существующей записи"""
+    print("\nОбновление записи")
+    
+    student_id = _read_int("Введите ID записи для обновления: ")
+    
+    # Показываем текущую запись
+    records = select_record(student_id=student_id)
+    if not records:
+        print(f"Запись с ID {student_id} не найдена.")
+        return
+    
+    print(f"Текущая запись: {records[0]}")
+    print("(Оставьте поле пустым, чтобы не менять)")
+    
+    first_name = input("Новое имя (Enter - пропустить): ").strip() or None
+    second_name = input("Новая фамилия (Enter - пропустить): ").strip() or None
+    
+    age = _read_optional_int("Новый возраст (Enter - пропустить): ")
+    sex = input("Новый пол (Enter - пропустить): ").strip() or None
+    
+    try:
+        updated = update_record(student_id, first_name, second_name, age, sex)
+        print(f"Запись обновлена: {updated}")
+    except KeyError as exc:
+        print(f"Ошибка: {exc}")
+    except ValueError as exc:
+        print(f"Ошибка: {exc}")
+
+def _delete_student() -> None:
+    """Удаление записи"""
+    print("\nУдаление записи")
+    
+    student_id = _read_int("Введите ID записи для удаления: ")
+    
+    # Подтверждение удаления
+    confirm = input(f"Вы уверены, что хотите удалить запись с ID {student_id}? (y/N): ").strip().lower()
+    
+    if confirm != 'y':
+        print("Удаление отменено.")
+        return
+    
+    try:
+        delete_record(student_id)
+        print(f"Запись с ID {student_id} успешно удалена.")
+    except KeyError as exc:
+        print(f"Ошибка: {exc}")
