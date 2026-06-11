@@ -31,3 +31,37 @@ class TestMemory(unittest.TestCase):
         results = self.table.select_record(student_id=1)
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0][1], "Иван")
+
+    def test_select_by_second_name(self):
+        self.table.create_record(1, "Иван", "Петров", 20, "M")
+        self.table.create_record(2, "Мария", "Иванова", 22, "F")
+        results = self.table.select_record(second_name="Петров")
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0][1], "Иван")
+
+    def test_select_by_age(self):
+        self.table.create_record(1, "Иван", "Петров", 20, "M")
+        self.table.create_record(2, "Мария", "Иванова", 22, "F")
+        results = self.table.select_record(age=20)
+        self.assertEqual(len(results), 1)
+
+    def test_select_by_sex(self):
+        self.table.create_record(1, "Иван", "Петров", 20, "M")
+        self.table.create_record(2, "Мария", "Иванова", 22, "F")
+        results = self.table.select_record(sex="F")
+        self.assertEqual(len(results), 1)
+
+    def test_select_empty_result(self):
+        results = self.table.select_record(first_name="Nonexistent")
+        self.assertEqual(results, [])
+
+    def test_update_record(self):
+        self.table.create_record(1, "Иван", "Петров", 20, "M")
+        updated = self.table.update_record(1, first_name="Пётр")
+        self.assertEqual(updated[1], "Пётр")
+
+    def test_delete_record(self):
+        self.table.create_record(1, "Иван", "Петров", 20, "M")
+        self.table.delete_record(1)
+        results = self.table.select_record()
+        self.assertEqual(len(results), 0)

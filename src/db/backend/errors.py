@@ -21,3 +21,7 @@ class TableNotFoundError(DatabaseError):
 class InvalidStorageDataError(DatabaseError):
     """Ошибка при чтении повреждённого файла."""
     pass
+
+class TableAlreadyExistsError(DatabaseError):
+    """Ошибка при попытке создать уже существующую таблицу."""
+    pass

@@ -30,7 +30,10 @@ class TUI:
             if cmd == "1":
                 name = input("Имя таблицы: ")
                 self.current_table = name
-                self.db.create_table(name)
+                if hasattr(self.db, 'create_table'):
+                    self.db.create_table(name)
+                else:
+                    print("Таблица создана (in-memory)")
                 print(f"Таблица '{name}' создана")
 
             elif cmd == "2":

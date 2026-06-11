@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from .memory import StudentTable
 from .errors import TableNotFoundError, InvalidStorageDataError
+from .errors import TableAlreadyExistsError, TableNotFoundError, InvalidStorageDataError
 
 type StudentRecord = tuple[int, str, str, int, str]
 
@@ -43,7 +44,7 @@ class FileDatabase:
     def create_table(self, table_name: str) -> None:
         """Создаёт новую таблицу."""
         if table_name in self._tables:
-            print(f"Таблица '{table_name}' уже существует")
+            raise TableAlreadyExistsError(f"Таблица '{table_name}' уже существует")
             return
         self._tables[table_name] = StudentTable()
         self._save_table_to_disk(table_name, self._tables[table_name])
