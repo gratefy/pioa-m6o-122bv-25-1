@@ -2,24 +2,57 @@
 М6О-122БВ-25
 Python
 
-Реализована система управления данными с поддержкой двух типов баз данных:
+## Структура проекта
 
-1: In-memory — данные хранятся в оперативной памяти (теряются после выхода)
-2: File database (JSON) — данные сохраняются в файлы на диске и не теряются
-Структура:
-pioa-m6o-122bv-25-1/
+```
 src/
-├── db/
-│ ├── main.py # точка входа
-│ ├── tui.py # интерфейс
-│ └── backend/
-│ ├── memory.py # in-memory БД
-│ ├── file_database.py # файловая БД (JSON)
-│ ├── database.py # общий интерфейс
-│ └── errors.py # исключения
+└── db/
+    ├── __main__.py              # точка входа
+    ├── tui.py                   # консольный интерфейс
+    └── backend/
+        ├── memory.py            # MemoryDatabase + StudentTable
+        ├── file_database.py     # FileDatabase
+        └── errors.py            # исключения
 tests/
 ├── test_memory.py
 └── test_file_database.py
+```
 
-Запуск - python -m src.db
-Запуск тестов - python -m unittest discover -s tests
+---
+
+## Функциональность
+
+- Создание таблиц
+- Добавление записей
+- Поиск с фильтрацией по любому полю
+- Обновление записей
+- Удаление записей
+- Сохранение на диск (JSON)
+- Загрузка данных при запуске
+
+---
+
+## Запуск
+
+```bash
+python -m src.db
+```
+
+---
+
+## Тесты
+
+```bash
+python -m unittest discover -s tests
+```
+
+---
+
+## Формат хранения (JSON)
+
+```json
+{
+  "schema": ["student_id", "first_name", "second_name", "age", "sex"],
+  "records": [[1, "Иван", "Петров", 20, "M"]]
+}
+```

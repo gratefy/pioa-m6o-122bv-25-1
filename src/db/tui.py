@@ -1,4 +1,4 @@
-from .backend.memory import StudentTable
+from .backend.memory import MemoryDatabase
 from .backend.file_database import FileDatabase
 
 class TUI:
@@ -12,7 +12,7 @@ class TUI:
             self.db = FileDatabase()
             self.db_type = "файловая"
         else:
-            self.db = StudentTable()
+            self.db = MemoryDatabase()
             self.db_type = "in-memory"
 
         self.current_table = None
@@ -23,6 +23,8 @@ class TUI:
             print("1. Создать таблицу")
             print("2. Добавить запись")
             print("3. Найти записи")
+            print("4. Обновить запись")
+            print("5. Удалить запись")
             print("0. Выход")
 
             cmd = input("Выберите действие: ")
@@ -30,10 +32,7 @@ class TUI:
             if cmd == "1":
                 name = input("Имя таблицы: ")
                 self.current_table = name
-                if hasattr(self.db, 'create_table'):
-                    self.db.create_table(name)
-                else:
-                    print("Таблица создана (in-memory)")
+                self.db.create_table(name)
                 print(f"Таблица '{name}' создана")
 
             elif cmd == "2":
@@ -78,6 +77,43 @@ class TUI:
                 print("\nРезультаты:")
                 for r in results:
                     print(r)
+
+            elif cmd == "4":
+                if not self.current_table:
+                    print("Сначала создайте таблицу")
+                    continue
+                try:
+                    sid = int(input("ID студента для обновления: "))
+                    print("Оставьте поле пустым, чтобы не менять")
+                    fname = input("Новое имя: ") or None
+                    sname = input("Новая фамилия: ") or None
+                    age = input("Новый возраст: ")
+                    age = int(age) if age else None
+                    sex = input("Новый пол: ") or None
+                    updates = {}
+                    if fname:
+                        updates["first_name"] = fname
+                    if sname:
+                        updates["second_name"] = sname
+                    if age:
+                        updates["age"] = age
+                    if sex:
+                        updates["sex"] = sex
+                    self.db.update_record(self.current_table, sid, **updates)
+                    print("Запись обновлена")
+                except Exception as e:
+                    print(f"Ошибка: {e}")
+
+            elif cmd == "5":
+                if not self.current_table:
+                    print("Сначала создайте таблицу")
+                    continue
+                try:
+                    sid = int(input("ID студента для удаления: "))
+                    self.db.delete_record(self.current_table, sid)
+                    print("Запись удалена")
+                except Exception as e:
+                    print(f"Ошибка: {e}")
 
             elif cmd == "0":
                 print("Выход.")

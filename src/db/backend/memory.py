@@ -6,10 +6,6 @@ class StudentTable:
     def __init__(self) -> None:
         self._student: list[StudentRecord] = []
 
-    def create_table(self, table_name: str) -> None:
-        """In-memory БД не требует создания таблицы, но метод нужен для единого интерфейса."""
-        self.table_name = table_name
-
     def create_record(
         self,
         student_id: int,
@@ -100,7 +96,36 @@ class StudentTable:
             if record[0] == student_id:
                 del self._student[i]
                 return
-        raise KeyError(f"Запись с id={student_id} не найдена.")    
-    
+        raise KeyError(f"Запись с id={student_id} не найдена.")
+
+
+class MemoryDatabase:
+    """In-memory БД с поддержкой нескольких таблиц."""
+
+    def __init__(self):
+        self.tables: dict[str, StudentTable] = {}
+
     def create_table(self, table_name: str) -> None:
-        self.table_name = table_name
+        if table_name in self.tables:
+            raise Exception(f"Таблица '{table_name}' уже существует")
+        self.tables[table_name] = StudentTable()
+
+    def create_record(self, table_name: str, *args) -> StudentRecord:
+        if table_name not in self.tables:
+            raise Exception(f"Таблица '{table_name}' не существует")
+        return self.tables[table_name].create_record(*args)
+
+    def select_records(self, table_name: str, **filters) -> list[StudentRecord]:
+        if table_name not in self.tables:
+            raise Exception(f"Таблица '{table_name}' не существует")
+        return self.tables[table_name].select_record(**filters)
+
+    def update_record(self, table_name: str, student_id: int, **updates) -> StudentRecord:
+        if table_name not in self.tables:
+            raise Exception(f"Таблица '{table_name}' не существует")
+        return self.tables[table_name].update_record(student_id, **updates)
+
+    def delete_record(self, table_name: str, student_id: int) -> None:
+        if table_name not in self.tables:
+            raise Exception(f"Таблица '{table_name}' не существует")
+        return self.tables[table_name].delete_record(student_id)
