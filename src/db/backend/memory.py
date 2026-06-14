@@ -1,4 +1,9 @@
-from .errors import DuplicateIDError, InvalidAgeError
+from .errors import (
+    DuplicateIDError,
+    InvalidAgeError,
+    TableNotFoundError,
+    TableAlreadyExistsError
+)
 
 type StudentRecord = tuple[int, str, str, int, str]
 
@@ -98,6 +103,10 @@ class StudentTable:
                 return
         raise KeyError(f"Запись с id={student_id} не найдена.")
 
+    def get_records(self) -> list[StudentRecord]:
+        """Публичный метод для получения записей (для сериализации)."""
+        return self._student.copy()
+
 
 class MemoryDatabase:
     """In-memory БД с поддержкой нескольких таблиц."""
@@ -107,25 +116,26 @@ class MemoryDatabase:
 
     def create_table(self, table_name: str) -> None:
         if table_name in self.tables:
-            raise Exception(f"Таблица '{table_name}' уже существует")
+            raise TableAlreadyExistsError(f"Таблица '{table_name}' уже существует")
         self.tables[table_name] = StudentTable()
 
-    def create_record(self, table_name: str, *args) -> StudentRecord:
+    def _get_table(self, table_name: str) -> StudentTable:
         if table_name not in self.tables:
-            raise Exception(f"Таблица '{table_name}' не существует")
-        return self.tables[table_name].create_record(*args)
+            raise TableNotFoundError(f"Таблица '{table_name}' не существует")
+        return self.tables[table_name]
+
+    def create_record(self, table_name: str, *args) -> StudentRecord:
+        table = self._get_table(table_name)
+        return table.create_record(*args)
 
     def select_records(self, table_name: str, **filters) -> list[StudentRecord]:
-        if table_name not in self.tables:
-            raise Exception(f"Таблица '{table_name}' не существует")
-        return self.tables[table_name].select_record(**filters)
+        table = self._get_table(table_name)
+        return table.select_record(**filters)
 
     def update_record(self, table_name: str, student_id: int, **updates) -> StudentRecord:
-        if table_name not in self.tables:
-            raise Exception(f"Таблица '{table_name}' не существует")
-        return self.tables[table_name].update_record(student_id, **updates)
+        table = self._get_table(table_name)
+        return table.update_record(student_id, **updates)
 
     def delete_record(self, table_name: str, student_id: int) -> None:
-        if table_name not in self.tables:
-            raise Exception(f"Таблица '{table_name}' не существует")
-        return self.tables[table_name].delete_record(student_id)
+        table = self._get_table(table_name)
+        return table.delete_record(student_id)

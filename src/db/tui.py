@@ -63,16 +63,24 @@ class TUI:
 
                 filters = {}
                 if sid:
-                    filters["student_id"] = int(sid)
+                    try:
+                        filters["student_id"] = int(sid)
+                    except ValueError:
+                        print("Ошибка: ID должен быть числом")
+                        return
                 if fname:
                     filters["first_name"] = fname
                 if sname:
                     filters["second_name"] = sname
                 if age:
-                    filters["age"] = int(age)
+                    try:
+                        filters["age"] = int(age)
+                    except ValueError:
+                        print("Ошибка: возраст должен быть числом")
+                        return
                 if sex:
                     filters["sex"] = sex
-
+                    
                 results = self.db.select_records(self.current_table, **filters)
                 print("\nРезультаты:")
                 for r in results:

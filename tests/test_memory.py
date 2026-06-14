@@ -1,6 +1,11 @@
 import unittest
-from src.db.backend.memory import StudentTable
-from src.db.backend.errors import InvalidAgeError, DuplicateIDError
+from src.db.backend.memory import StudentTable, MemoryDatabase
+from src.db.backend.errors import (
+    InvalidAgeError,
+    DuplicateIDError,
+    TableAlreadyExistsError,
+    TableNotFoundError
+)
 
 class TestMemory(unittest.TestCase):
     def setUp(self):
@@ -65,3 +70,45 @@ class TestMemory(unittest.TestCase):
         self.table.delete_record(1)
         results = self.table.select_record()
         self.assertEqual(len(results), 0)
+
+
+class TestMemoryDatabase(unittest.TestCase):
+    def setUp(self):
+        self.db = MemoryDatabase()
+
+    def test_create_table(self):
+        self.db.create_table("students")
+        self.assertIn("students", self.db.tables)
+
+    def test_create_table_already_exists(self):
+        self.db.create_table("students")
+        with self.assertRaises(TableAlreadyExistsError):
+            self.db.create_table("students")
+
+    def test_create_record(self):
+        self.db.create_table("students")
+        record = self.db.create_record("students", 1, "Иван", "Петров", 20, "M")
+        self.assertEqual(record[1], "Иван")
+
+    def test_select_records(self):
+        self.db.create_table("students")
+        self.db.create_record("students", 1, "Иван", "Петров", 20, "M")
+        results = self.db.select_records("students", first_name="Иван")
+        self.assertEqual(len(results), 1)
+
+    def test_update_record(self):
+        self.db.create_table("students")
+        self.db.create_record("students", 1, "Иван", "Петров", 20, "M")
+        updated = self.db.update_record("students", 1, first_name="Пётр")
+        self.assertEqual(updated[1], "Пётр")
+
+    def test_delete_record(self):
+        self.db.create_table("students")
+        self.db.create_record("students", 1, "Иван", "Петров", 20, "M")
+        self.db.delete_record("students", 1)
+        results = self.db.select_records("students")
+        self.assertEqual(len(results), 0)
+
+    def test_table_not_found(self):
+        with self.assertRaises(TableNotFoundError):
+            self.db.select_records("nonexistent")

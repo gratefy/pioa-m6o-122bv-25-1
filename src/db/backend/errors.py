@@ -18,10 +18,14 @@ class TableNotFoundError(DatabaseError):
     """Ошибка при обращении к несуществующей таблице."""
     pass
 
+class TableAlreadyExistsError(DatabaseError):
+    """Ошибка при попытке создать уже существующую таблицу."""
+    pass
+
 class InvalidStorageDataError(DatabaseError):
     """Ошибка при чтении повреждённого файла."""
     pass
 
-class TableAlreadyExistsError(DatabaseError):
-    """Ошибка при попытке создать уже существующую таблицу."""
+class InvalidInputError(DatabaseError):
+    """Ошибка при некорректном вводе пользователя."""
     pass
